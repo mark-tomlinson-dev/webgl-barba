@@ -459,6 +459,10 @@ var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _three = require("three");
 var _orbitControlsJs = require("three/examples/jsm/controls/OrbitControls.js");
+var _fragmentGlsl = require("./shaders/fragment.glsl");
+var _fragmentGlslDefault = parcelHelpers.interopDefault(_fragmentGlsl);
+var _vertexGlsl = require("./shaders/vertex.glsl");
+var _vertexGlslDefault = parcelHelpers.interopDefault(_vertexGlsl);
 class Sketch {
     constructor(options){
         this.container = options.domElement;
@@ -468,13 +472,14 @@ class Sketch {
         this.camera.position.z = 1;
         this.scene = new _three.Scene();
         this.renderer = new _three.WebGLRenderer({
-            antialias: true
+            antialias: true,
+            alpha: true
         });
-        this.renderer.setSize(this.width, this.height);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.container.appendChild(this.renderer.domElement);
         this.controls = new _orbitControlsJs.OrbitControls(this.camera, this.renderer.domElement);
         this.time = 0;
+        this.resize();
         this.addObjects();
         this.render();
         this.setupResize();
@@ -490,13 +495,26 @@ class Sketch {
         window.addEventListener('resize', this.resize.bind(this));
     }
     addObjects() {
-        this.geometry = new _three.BoxGeometry(0.2, 0.2, 0.2);
-        this.material = new _three.MeshNormalMaterial();
+        this.geometry = new _three.PlaneBufferGeometry(0.5, 0.5, 100, 100);
+        console.log(this.geometry);
+        this.material = new _three.ShaderMaterial({
+            uniforms: {
+                time: {
+                    value: 1
+                },
+                resolution: {
+                    value: new _three.Vector2()
+                }
+            },
+            vertexShader: _vertexGlslDefault.default,
+            fragmentShader: _fragmentGlslDefault.default
+        });
         this.mesh = new _three.Mesh(this.geometry, this.material);
         this.scene.add(this.mesh);
     }
     render() {
         this.time += 0.05;
+        this.material.uniforms.time.value = this.time;
         this.mesh.rotation.x = this.time / 2000;
         this.mesh.rotation.y = this.time / 1000;
         this.renderer.render(this.scene, this.camera);
@@ -508,7 +526,7 @@ new Sketch({
     domElement: document.getElementById('container')
 });
 
-},{"three":"1Cu8s","@parcel/transformer-js/src/esmodule-helpers.js":"jJTBR","three/examples/jsm/controls/OrbitControls.js":"3a08T"}],"1Cu8s":[function(require,module,exports) {
+},{"three":"1Cu8s","@parcel/transformer-js/src/esmodule-helpers.js":"jJTBR","three/examples/jsm/controls/OrbitControls.js":"3a08T","./shaders/fragment.glsl":"4eqq1","./shaders/vertex.glsl":"jiU88"}],"1Cu8s":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "ACESFilmicToneMapping", ()=>ACESFilmicToneMapping
@@ -30919,6 +30937,12 @@ class MapControls extends OrbitControls {
     }
 }
 
-},{"three":"1Cu8s","@parcel/transformer-js/src/esmodule-helpers.js":"jJTBR"}]},["6Lka6","9vKY9"], "9vKY9", "parcelRequire94c2")
+},{"three":"1Cu8s","@parcel/transformer-js/src/esmodule-helpers.js":"jJTBR"}],"4eqq1":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nvoid main() {\n  gl_FragColor = vec4(0.,0.,1.,1.)\n}";
+
+},{}],"jiU88":[function(require,module,exports) {
+module.exports = "#define GLSLIFY 1\nvoid main() {\n  gl_Position = projectionMatrix *\n  modelViewMatrix * vec4( postion, 1.0 )\n}";
+
+},{}]},["6Lka6","9vKY9"], "9vKY9", "parcelRequire94c2")
 
 //# sourceMappingURL=index.fd185511.js.map
