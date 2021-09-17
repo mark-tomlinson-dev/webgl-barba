@@ -471,11 +471,23 @@ class Sketch {
             antialias: true
         });
         this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
         this.container.appendChild(this.renderer.domElement);
         this.controls = new _orbitControlsJs.OrbitControls(this.camera, this.renderer.domElement);
         this.time = 0;
         this.addObjects();
         this.render();
+        this.setupResize();
+    }
+    resize() {
+        this.width = this.container.offsetWidth;
+        this.height = this.container.offsetHeight;
+        this.renderer.setSize(this.width, this.height);
+        this.camera.aspect = this.width / this.height;
+        this.camera.updateProjectionMatrix();
+    }
+    setupResize() {
+        window.addEventListener('resize', this.resize.bind(this));
     }
     addObjects() {
         this.geometry = new _three.BoxGeometry(0.2, 0.2, 0.2);
